@@ -4,7 +4,7 @@ const app = express();
 
 const PORT = process.env.PORT || 3001;
 
-const allowedSites = ["https://stacjownik-td2.web.app"];
+const allowedSites = ["https://stacjownik-td2.web.app", "http://localhost:8080"];
 
 app.use(express.json());
 app.use(cors({
