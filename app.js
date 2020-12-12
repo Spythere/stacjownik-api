@@ -23,7 +23,7 @@ app.use(cors({
 app.use("/api", require('./api/apiRouter'));
 
 app.get('/', (req, res) => {
-    res.status(200).send("Chyba działa! :)");
+    res.status(200).send({ msg: "Witaj! Korzystasz teraz z API Stacjownika!", status: 200, statusLoaded: true });
 }); 
 
 app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
