@@ -20,10 +20,13 @@ const corsOptions = {
 
 const app: express.Application = express();
 
-const DB_URL = `mongodb+srv://${process.env.DB_LOGIN}:${process.env.DB_PWD}@cluster0.pv4eb.mongodb.net/stacjownik-db?retryWrites=true&w=majority`;
+const DB_URL =
+  process.env.NODE_ENV == 'production'
+    ? `mongodb+srv://${process.env.DB_LOGIN}:${process.env.DB_PWD}@cluster0.pv4eb.mongodb.net/stacjownik-db?retryWrites=true&w=majority`
+    : 'mongodb://127.0.0.1/stacjownik-db';
 // DB connection
 mongoose
-  .connect('mongodb://127.0.0.1/my_database', {
+  .connect(DB_URL, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useCreateIndex: true,
@@ -37,7 +40,7 @@ app.use(express.json());
 app.use('/api', require('./api/apiRouter'));
 
 // API listeners setup
-setupSceneryDataListener();
+setupSceneryDataListener(1000 * 60 * 5);
 
 // Routing
 app.get('/', (req, res) => {

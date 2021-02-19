@@ -13,7 +13,7 @@ router.get('/getStationCount', (req, res) => {
 });
 
 router.get('/getSceneryHistory', async (req, res) => {
-  const sceneries = await Scenery.find();
+  const sceneries = await (req.query.name ? Scenery.find({ stationName: req.query.name as string }) : Scenery.find({}));
 
   if (!sceneries) res.status(404);
 

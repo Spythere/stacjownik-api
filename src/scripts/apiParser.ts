@@ -199,7 +199,6 @@ export default class APIDataParser {
           const statusTimestamp = getStatusTimestamp(stationStatus);
 
           const stationTrains = onlineTrainsData.filter((train: any) => train.region === 'eu' && train.isOnline && train.station.stationName === station.stationName);
-
           acc.push({
             stationName: station.stationName,
             stationHash: station.stationHash,
