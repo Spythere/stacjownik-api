@@ -20,9 +20,10 @@ const corsOptions = {
 
 const app: express.Application = express();
 
+const DB_URL = `mongodb+srv://${process.env.DB_LOGIN}:${process.env.DB_PWD}@cluster0.pv4eb.mongodb.net/stacjownik-db?retryWrites=true&w=majority`;
 // DB connection
 mongoose
-  .connect(`mongodb+srv://${process.env.DB_LOGIN}:${process.env.DB_PWD}@cluster0.pv4eb.mongodb.net/stacjownik-db?retryWrites=true&w=majority`, {
+  .connect('mongodb://127.0.0.1/my_database', {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useCreateIndex: true,
@@ -42,37 +43,5 @@ setupSceneryDataListener();
 app.get('/', (req, res) => {
   res.status(200).send({ msg: 'Witaj! Korzystasz teraz z API Stacjownika!', status: 200, statusLoaded: true });
 });
-
-// app.get('/testdb', (req, res) => {
-//   const scenery = new Scenery({
-//     stationHash: '3c26fa1',
-//     stationName: 'Testowo',
-//     currentDispatcher: 'Spythere',
-//     currentDispatcherFrom: new Date(),
-//     dispatcherHistory: [[String, Date, Date]],
-//   });
-
-//   scenery
-//     .save()
-//     .then(result => {
-//       res.send(result).status(200);
-//     })
-//     .catch(err => {
-//       res.status(400);
-//     });
-// });
-
-// app.get('/getdb', (req, res) => {
-//   Scenery.find()
-//     .then(sceneries => res.send(sceneries))
-//     .catch(err => res.status(400));
-// });
-
-// app.get('/updatedb', (req, res) => {
-//   Scenery.updateOne(
-//     { stationName: 'Testowo' },
-//     { $push: { dispatcherHistory: new Array(20).fill(0).map(v => ({ dispatcherName: 'dsdfgh', dispatcherFrom: Date.now(), dispatcherTo: Date.now() })) } }
-//   ).then(() => res.status(200).send('Gitara'));
-// });
 
 app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));

@@ -94,7 +94,7 @@ const _getSceneryData = async () => {
 
 const setupSceneryDataListener = () => {
   _getSceneryData();
-  setInterval(_getSceneryData, 1000 * 10 * 1);
+  setInterval(_getSceneryData, 1000 * 60 * 5);
 
   console.log('Scenery Data Listener initialized!');
 };
