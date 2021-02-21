@@ -19,12 +19,14 @@ const _getSceneryData = async () => {
 
   const onlineStationList: string[] = [];
 
+  // Loop through every single online station in EU region
   onlineStationsData.forEach(async station => {
     if (station.region != 'eu' || !station.isOnline) return;
 
     onlineStationList.push(station.stationName);
     const sceneryDoc = await Scenery.findOne({ stationName: station.stationName });
 
+    // If station isn't in DB, add it with current dispatcher info and empty history array
     if (!sceneryDoc) {
       const newSceneryDoc = await Scenery.create({
         stationHash: station.stationHash,
@@ -43,9 +45,11 @@ const _getSceneryData = async () => {
       return;
     }
 
+    // Check if station doesn't have current dispatcher (was offline before)
     if (sceneryDoc.currentDispatcher == '') {
       const lastDispatcher = sceneryDoc.dispatcherHistory.length > 0 ? sceneryDoc.dispatcherHistory[sceneryDoc.dispatcherHistory.length - 1] : null;
 
+      // If station's current dispatcher is the same as the last one withing 30min time range, continue his duty (remove the last entry from history array)
       if (lastDispatcher && station.dispatcherName == lastDispatcher.dispatcherName && lastDispatcher.dispatcherTo > Date.now() - 30 * 60 * 1000)
         sceneryDoc.updateOne({
           currentDispatcher: station.dispatcherName,
@@ -53,6 +57,7 @@ const _getSceneryData = async () => {
           currentDispatcherFrom: lastDispatcher.dispatcherFrom,
           $pop: { dispatcherHistory: 1 },
         });
+      // If not - update current dispatcher info only
       else
         sceneryDoc
           .updateOne({
@@ -63,6 +68,8 @@ const _getSceneryData = async () => {
           .then(() => console.log('Sceneria online!', station.stationName, Date.now()))
           .catch(() => console.log('Błąd podczas aktualizacji nowej scenerii online!'));
     } else if (sceneryDoc.currentDispatcher != station.dispatcherName) {
+      // If scenery has a current dispatcher but it's not the same one as in DB,
+      //save the previous one to history array and update current info
       sceneryDoc
         .updateOne({
           currentDispatcher: station.dispatcherName,
@@ -82,29 +89,39 @@ const _getSceneryData = async () => {
     }
   });
 
+  // The rest of sceneries which aren't online anymore (aren't in online list but have current dispatcher)
   (await Scenery.find({ stationName: { $nin: onlineStationList }, currentDispatcher: { $ne: '' } })).forEach(sceneryDoc => {
-    sceneryDoc
-      .updateOne({
+    // If a dispatcher has duty equal/longer than 30 min, save it in history array
+    if (sceneryDoc.currentDispatcherFrom <= Date.now() - 30 * 60 * 1000)
+      sceneryDoc
+        .updateOne({
+          currentDispatcher: '',
+          currentDispatcherId: 0,
+          currentDispatcherFrom: -1,
+          $push: {
+            dispatcherHistory: {
+              dispatcherName: sceneryDoc.currentDispatcher,
+              dispatcherId: sceneryDoc.currentDispatcherId,
+              dispatcherFrom: sceneryDoc.currentDispatcherFrom,
+              dispatcherTo: Date.now(),
+            },
+          },
+        })
+        .then(() => console.log('Sceneria offline!', sceneryDoc.stationName, Date.now()))
+        .catch(() => console.log('Błąd podczas aktualizacji scenerii offline!'));
+    else
+      sceneryDoc.updateOne({
         currentDispatcher: '',
         currentDispatcherId: 0,
         currentDispatcherFrom: -1,
-        $push: {
-          dispatcherHistory: {
-            dispatcherName: sceneryDoc.currentDispatcher,
-            dispatcherId: sceneryDoc.currentDispatcherId,
-            dispatcherFrom: sceneryDoc.currentDispatcherFrom,
-            dispatcherTo: Date.now(),
-          },
-        },
-      })
-      .then(() => console.log('Sceneria offline!', sceneryDoc.stationName, Date.now()))
-      .catch(() => console.log('Błąd podczas aktualizacji scenerii offline!'));
+      });
   });
 };
 
 const setupSceneryDataListener = (minuteInterval: number) => {
   // _getSceneryData();
 
+  /* Check and update data at exact minutes */
   setInterval(() => {
     if (new Date().getMinutes() % minuteInterval == 0) _getSceneryData();
   }, 1000 * 60);
