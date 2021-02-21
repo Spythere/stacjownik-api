@@ -17,7 +17,7 @@ router.get('/getSceneryHistory', async (req, res) => {
 
   const scenery = await (!req.query.name ? Scenery.findOne({}) : Scenery.findOne({ stationName: (req.query.name as string).replace(/_/g, ' ') }));
 
-  if (!scenery) return res.status(404).json({});
+  // if (!scenery) return res.status(200).json(null);
   res.status(200).json(scenery);
 });
 

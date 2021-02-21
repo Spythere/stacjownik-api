@@ -44,14 +44,24 @@ const _getSceneryData = async () => {
     }
 
     if (sceneryDoc.currentDispatcher == '') {
-      sceneryDoc
-        .updateOne({
+      const lastDispatcher = sceneryDoc.dispatcherHistory.length > 0 ? sceneryDoc.dispatcherHistory[sceneryDoc.dispatcherHistory.length - 1] : null;
+
+      if (lastDispatcher && station.dispatcherName == lastDispatcher.dispatcherName && lastDispatcher.dispatcherTo > Date.now() - 30 * 60 * 1000)
+        sceneryDoc.updateOne({
           currentDispatcher: station.dispatcherName,
           currentDispatcherId: station.dispatcherId,
-          currentDispatcherFrom: Date.now(),
-        })
-        .then(() => console.log('Sceneria online!', station.stationName, Date.now()))
-        .catch(() => console.log('Błąd podczas aktualizacji nowej scenerii online!'));
+          currentDispatcherFrom: lastDispatcher.dispatcherFrom,
+          $pop: { dispatcherHistory: 1 },
+        });
+      else
+        sceneryDoc
+          .updateOne({
+            currentDispatcher: station.dispatcherName,
+            currentDispatcherId: station.dispatcherId,
+            currentDispatcherFrom: Date.now(),
+          })
+          .then(() => console.log('Sceneria online!', station.stationName, Date.now()))
+          .catch(() => console.log('Błąd podczas aktualizacji nowej scenerii online!'));
     } else if (sceneryDoc.currentDispatcher != station.dispatcherName) {
       sceneryDoc
         .updateOne({
@@ -92,9 +102,12 @@ const _getSceneryData = async () => {
   });
 };
 
-const setupSceneryDataListener = (interval: number) => {
-  _getSceneryData();
-  setInterval(_getSceneryData, interval);
+const setupSceneryDataListener = (minuteInterval: number) => {
+  // _getSceneryData();
+
+  setInterval(() => {
+    if (new Date().getMinutes() % minuteInterval == 0) _getSceneryData();
+  }, 1000 * 60);
 
   console.log('Scenery Data Listener initialized!');
 };
