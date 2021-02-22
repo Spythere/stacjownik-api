@@ -28,7 +28,7 @@ mongoose
     useUnifiedTopology: true,
     useCreateIndex: true,
   })
-  .then(res => console.log('MongoDB: Connected!'))
+  .then(res => console.log('MongoDB: Connected to ' + DB_URL + '!'))
   .catch(err => console.error("Something's wrong! " + err));
 
 // Middleware

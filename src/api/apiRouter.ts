@@ -15,7 +15,7 @@ router.get('/getStationCount', (req, res) => {
 router.get('/getSceneryHistory', async (req, res) => {
   if (req.query.name && typeof req.query.name !== 'string') return res.status(400).json({ errorMessage: 'Invalid request!' });
 
-  const scenery = await (!req.query.name ? Scenery.findOne({}) : Scenery.findOne({ stationName: (req.query.name as string).replace(/_/g, ' ') }));
+  const scenery = await (!req.query.name ? Scenery.find({}) : Scenery.findOne({ stationName: (req.query.name as string).replace(/_/g, ' ') }));
 
   // if (!scenery) return res.status(200).json(null);
   res.status(200).json(scenery);
