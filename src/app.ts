@@ -2,7 +2,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 const cors = require('cors');
 
-import setupSceneryDataListener from './scripts/sceneryUpdater';
+import sceneryUpdater from './scripts/sceneryUpdater';
 
 // Global variables
 const PORT = process.env.PORT || 3001;
@@ -29,7 +29,7 @@ mongoose
     useCreateIndex: true,
   })
   .then(res => console.log('MongoDB: Connected to ' + DB_URL + '!'))
-  .catch(err => console.error("Something's wrong! " + err));
+  .catch(err => console.error("Sometherohing's wrong! " + err));
 
 // Middleware
 app.use(cors(corsOptions));
@@ -37,7 +37,7 @@ app.use(express.json());
 app.use('/api', require('./api/apiRouter'));
 
 // API listeners setup
-setupSceneryDataListener(5);
+sceneryUpdater.setupSceneryDataListener(5);
 
 // Routing
 app.get('/', (req, res) => {

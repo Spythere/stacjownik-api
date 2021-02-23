@@ -1,8 +1,31 @@
 import { Schema, model, Model, Document } from 'mongoose';
 
 interface IScenery extends Document {
-  stationHash: String;
   stationName: String;
+  stationURL: String;
+  stationLines: String;
+  stationProject: String;
+
+  reqLevel: String;
+  supportersOnly: String;
+  signalType: String;
+  controlType: String;
+  SBL: String;
+  twoWayBlock: String;
+
+  routesOneWayCatenary: Number;
+  routesOneWayOther: Number;
+  routesTwoWayCatenary: Number;
+  routesToWayOther: Number;
+
+  default: Boolean;
+  nonPublic: Boolean;
+  unavailable: Boolean;
+  hasData: Boolean;
+
+  stops: String[];
+  checkpoints: String[];
+
   currentDispatcher: String;
   currentDispatcherId: Number;
   currentDispatcherFrom: Number;
@@ -10,14 +33,32 @@ interface IScenery extends Document {
 }
 
 const ScenerySchema = new Schema({
-  stationHash: String,
   stationName: String,
+  stationURL: String,
+  stationLines: String,
+  stationProject: String,
+  reqLevel: String,
+  supportersOnly: String,
+  signalType: String,
+  controlType: String,
+  SBL: String,
+  twoWayBlock: String,
+  routesOneWayCatenary: Number,
+  routesOneWayOther: Number,
+  routesTwoWayCatenary: Number,
+  routesToWayOther: Number,
+  default: Boolean,
+  nonPublic: Boolean,
+  unavailable: Boolean,
+  stops: [],
+  checkpoints: [],
+
+  hasData: Boolean,
+
   currentDispatcher: String,
   currentDispatcherFrom: Number,
   currentDispatcherId: Number,
   dispatcherHistory: [{ dispatcherName: String, dispatcherId: Number, dispatcherFrom: Number, dispatcherTo: Number }],
 });
 
-const SceneryModel: Model<IScenery> = model<IScenery>('Scenery', ScenerySchema);
-
-export default SceneryModel;
+export default model<IScenery>('Scenery', ScenerySchema);

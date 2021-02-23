@@ -1,10 +1,12 @@
 import axios from 'axios';
 import Scenery from '../db/models/SceneryModel';
 
+// import stationData from '../data/stations.json';
+
 const STATIONS_URL = 'https://api.td2.info.pl:9640/?method=getStationsOnline';
 // const DISPATCHERS_URL = 'https://api.td2.info.pl:9640/?method=readFromSWDR&value=getDispatcherStatusList%3B1';
 
-interface IStationData {
+interface IStationAPIData {
   stationName: string;
   stationHash: string;
   dispatcherName: string;
@@ -14,8 +16,7 @@ interface IStationData {
 }
 
 const _getSceneryData = async () => {
-  console.log('Gathering scenery data from TD2 API...');
-  const onlineStationsData: IStationData[] = await (await axios.get(STATIONS_URL)).data.message;
+  const onlineStationsData: IStationAPIData[] = await (await axios.get(STATIONS_URL)).data.message;
 
   const onlineStationList: string[] = [];
 
@@ -35,12 +36,13 @@ const _getSceneryData = async () => {
         currentDispatcherId: station.dispatcherId,
         currentDispatcherFrom: Date.now(),
         dispatcherHistory: [],
+        hasData: false,
       });
 
       newSceneryDoc
         .save()
-        .then(() => console.log('Nowa sceneria dodana do bazy!', station.stationName))
-        .catch(err => console.error('Błąd podczas dodawania nowej scenerii!', err));
+        .then(() => console.log('New station added!', station.stationName))
+        .catch(err => console.error('Error while adding new station: ', err));
 
       return;
     }
@@ -65,8 +67,8 @@ const _getSceneryData = async () => {
             currentDispatcherId: station.dispatcherId,
             currentDispatcherFrom: Date.now(),
           })
-          .then(() => console.log('Sceneria online!', station.stationName, Date.now()))
-          .catch(() => console.log('Błąd podczas aktualizacji nowej scenerii online!'));
+          .then(() => console.log('Station online!', station.stationName, Date.now()))
+          .catch(err => console.log('Error while station going online:', err));
     } else if (sceneryDoc.currentDispatcher != station.dispatcherName) {
       // If scenery has a current dispatcher but it's not the same one as in DB,
       //save the previous one to history array and update current info
@@ -84,8 +86,8 @@ const _getSceneryData = async () => {
             },
           },
         })
-        .then(() => console.log('Zmiana dyżurnego na scenerii!', station.stationName, Date.now()))
-        .catch(() => console.log('Błąd podczas aktualizacji nowej scenerii online!'));
+        .then(() => console.log('Station: changing dispatchers!', station.stationName, Date.now()))
+        .catch(err => console.log('Error while changing dispatchers:', err));
     }
   });
 
@@ -107,8 +109,8 @@ const _getSceneryData = async () => {
             },
           },
         })
-        .then(() => console.log('Sceneria offline!', sceneryDoc.stationName, Date.now()))
-        .catch(() => console.log('Błąd podczas aktualizacji scenerii offline!'));
+        .then(() => console.log('Station offline!', sceneryDoc.stationName, Date.now()))
+        .catch(err => console.log('Error while station going offline: ', err));
     else
       sceneryDoc.updateOne({
         currentDispatcher: '',
@@ -129,4 +131,4 @@ const setupSceneryDataListener = (minuteInterval: number) => {
   console.log('Scenery Data Listener initialized!');
 };
 
-export default setupSceneryDataListener;
+export default { setupSceneryDataListener };
