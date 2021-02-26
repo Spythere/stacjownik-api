@@ -4,10 +4,6 @@ import Scenery from '../db/models/SceneryModel';
 
 const router = express.Router();
 
-const sceneryOptions = {
-  dispatcherHistory: { $slice: 0 },
-};
-
 router.get('/getSceneryInfo', async (req, res) => {
   if (req.query.name && typeof req.query.name !== 'string') return res.status(400).json({ errorMessage: 'Invalid request!' });
 
@@ -19,7 +15,7 @@ router.get('/getSceneryInfo', async (req, res) => {
 
   try {
     const scenery = await (!req.query.name
-      ? Scenery.find({}, sceneryOptions)
+      ? Scenery.find({}, options)
       : Scenery.findOne(
           {
             stationName: (req.query.name as string).replace(/_/g, ' '),
