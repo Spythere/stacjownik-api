@@ -34,6 +34,7 @@ mongoose
   .catch(err => console.error("Sometherohing's wrong! " + err));
 
 // Middleware
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use('/api', require('./api/apiRouter'));
 
