@@ -6,6 +6,8 @@ import sceneryUpdater from './scripts/sceneryUpdater';
 
 // Global variables
 const PORT = process.env.PORT || 3001;
+const inProductionMode = process.env.NODE_ENV == 'production';
+
 const allowedSites = ['https://stacjownik-td2.web.app', 'http://localhost:8080'];
 const corsOptions = {
   origin: (origin: any, callback: any) => {
@@ -20,7 +22,7 @@ const corsOptions = {
 
 const app: express.Application = express();
 
-const DB_URL = process.env.NODE_ENV == 'production' ? `mongodb+srv://${process.env.DB_LOGIN}:${process.env.DB_PWD}@cluster0.pv4eb.mongodb.net/stacjownik-db?retryWrites=true&w=majority` : 'mongodb://127.0.0.1/stacjownik-db';
+const DB_URL = true ? `mongodb+srv://${process.env.DB_LOGIN}:${process.env.DB_PWD}@cluster0.pv4eb.mongodb.net/stacjownik-db?retryWrites=true&w=majority` : 'mongodb://127.0.0.1/stacjownik-db';
 // DB connection
 mongoose
   .connect(DB_URL, {
@@ -32,12 +34,12 @@ mongoose
   .catch(err => console.error("Sometherohing's wrong! " + err));
 
 // Middleware
-app.use(cors(corsOptions));
 app.use(express.json());
 app.use('/api', require('./api/apiRouter'));
 
 // API listeners setup
-sceneryUpdater.setupSceneryDataListener(5);
+
+if (inProductionMode) sceneryUpdater.setupSceneryDataListener(5);
 
 // Routing
 app.get('/', (req, res) => {

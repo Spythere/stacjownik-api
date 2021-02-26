@@ -15,6 +15,14 @@ interface IStationAPIData {
   isOnline: boolean;
 }
 
+const _limitDispatcherData = async () => {
+  Scenery.find({}).then(sceneries => {
+    sceneries.forEach(sceneryDoc => {
+      sceneryDoc.updateOne({});
+    });
+  });
+};
+
 const _getSceneryData = async () => {
   const onlineStationsData: IStationAPIData[] = await (await axios.get(STATIONS_URL)).data.message;
 
